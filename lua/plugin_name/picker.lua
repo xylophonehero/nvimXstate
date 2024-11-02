@@ -8,16 +8,21 @@ local action_state = require("telescope.actions.state")
 
 -- Load the Treesitter query from the bundled file
 local function load_query_file()
-  -- local query_path = debug.getinfo(1, "S").source:match("@(.*/)") .. "queries/xstate.scm"
-  local query_path = "/Users/nick/.config/nvim/after/queries/typescript/xstate.scm"
+  -- Determine the directory of the current file (i.e., the plugin directory)
+  local plugin_dir = debug.getinfo(1, "S").source:match("@(.*[/\\])") or ""
+
+  local query_path = plugin_dir .. "queries/typescript/xstate.scm"
+
+  -- Read the file contents
   local file = io.open(query_path, "r")
   if not file then
-    print("Failed to open query file: " .. query_path)
-    return nil
+    print("Error: Could not open query file.")
+    return
   end
-  local query_string = file:read("*all")
+  local query_text = file:read("*a")
   file:close()
-  return query_string
+
+  return query_text
 end
 
 -- Custom function to get node text
@@ -33,22 +38,14 @@ function M.treesitter_capture_picker()
   local capture_type = "xstate.state.name" -- Default to xstate.state.name
   local buffer = 0 -- Default to current buffer
 
+  local query_text = load_query_file()
+
   -- Get the syntax tree for the buffer
   local parser = ts.get_parser(buffer, "typescript")
   local root = parser:parse()[1]:root()
 
   -- Parse the query
-  local query = ts.query.parse(
-    "typescript",
-    [[
-(pair
-  key: (property_identifier) @xstate.states (#eq? @xstate.states "states")
-  value: (object
-    (pair
-      key: (property_identifier) @xstate.state.name
-      value: (_))))
-    ]]
-  )
+  local query = ts.query.parse( "typescript", query_text)
 
   -- Collect matching nodes with positions
   local matches = {}
