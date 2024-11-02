@@ -1,5 +1,5 @@
 -- main module file
-local module = require("plugin_name.module")
+local module = require("plugin_name.picker")
 
 ---@class Config
 ---@field opt string Your config option
@@ -20,8 +20,6 @@ M.setup = function(args)
   M.config = vim.tbl_deep_extend("force", M.config, args or {})
 end
 
-M.hello = function()
-  return module.my_first_function(M.config.opt)
-end
+M.treesitter_capture_picker = module.treesitter_capture_picker
 
 return M
