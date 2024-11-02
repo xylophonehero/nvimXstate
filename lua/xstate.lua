@@ -1,5 +1,7 @@
 -- main module file
-local module = require("plugin_name.picker")
+-- local module = require("modules.picker")
+local commands = require("modules.commands")
+local functions = require("modules.functions")
 
 ---@class Config
 ---@field opt string Your config option
@@ -18,8 +20,12 @@ M.config = config
 -- you can also put some validation here for those.
 M.setup = function(args)
   M.config = vim.tbl_deep_extend("force", M.config, args or {})
+  -- commands.setup()
 end
 
-M.treesitter_capture_picker = module.treesitter_capture_picker
+M.pick_state = function ()
+  local matches = functions.get_query_matches("xstate.state.name")
+  functions.picker_from_matches(matches)
+end
 
 return M
