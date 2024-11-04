@@ -3,46 +3,22 @@ local M = {}
 
 local ts = vim.treesitter
 
+-- Function to get the machine or setup object
 M.get_machine_object = function()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local parser = vim.treesitter.get_parser(bufnr, "javascript") -- or "typescript"
-  local tree = parser:parse()[1]
-  local root = tree:root()
-
-  -- Load the query for the machine object
-  local query = vim.treesitter.query.parse_query("javascript", [[
-    (call_expression
-      function: (identifier) @machine_func (#eq? @machine_func "createMachine")
-      arguments: (object) @machine_object)
-
-    (call_expression
-      function: (member_expression
-        object: (call_expression
-          function: (identifier) @setup_func (#eq? @setup_func "setup"))
-        property: (property_identifier) @machine_func (#eq? @machine_func "createMachine"))
-      arguments: (object) @machine_object)
-  ]])
-
-  -- Find and return the machine object node
-  for _, match, _ in query:iter_matches(root, bufnr, 0, -1) do
-    local machine_object_node = match[2] -- The `@machine_object` capture
-    return machine_object_node
-  end
-end
-
--- M.pick_state = function ()
---   local matches = utils.get_query_matches("xstate.state.name")
---   utils.picker_from_matches(matches)
--- end
-
--- Function to get query matches
-M.get_query_matches = function(capture_type, buffer)
-  buffer = buffer or 0 -- Default to current buffer
-  local query_text = utils.load_query_file()
+  local buffer = 0 -- Default to current buffer
 
   -- Get the syntax tree for the buffer
   local parser = ts.get_parser(buffer, "typescript")
   local root = parser:parse()[1]:root()
+
+  local matches = M.get_query_matches("xstate.machine_config", root, buffer)
+  return matches[1].node
+end
+
+-- Function to get query matches
+M.get_query_matches = function(capture_type, root, buffer)
+  buffer = buffer or 0 -- Default to current buffer
+  local query_text = utils.load_query_file()
 
   -- Parse the query
   local query = ts.query.parse("typescript", query_text)

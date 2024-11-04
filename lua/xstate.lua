@@ -1,6 +1,4 @@
 -- main module file
--- local module = require("modules.picker")
-local commands = require("modules.commands")
 local functions = require("modules.functions")
 
 ---@class Config
@@ -24,7 +22,8 @@ M.setup = function(args)
 end
 
 M.pick_state = function ()
-  local matches = functions.get_query_matches("xstate.state.name")
+  local root = functions.get_machine_object()
+  local matches = functions.get_query_matches("xstate.state.name", root)
   functions.picker_from_matches(matches)
 end
 
