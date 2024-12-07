@@ -1,7 +1,5 @@
 -- main module file
--- local module = require("modules.picker")
-local commands = require("modules.commands")
-local functions = require("modules.functions")
+local functions = require("xstate.modules.functions")
 
 ---@class Config
 ---@field opt string Your config option
@@ -20,12 +18,16 @@ M.config = config
 -- you can also put some validation here for those.
 M.setup = function(args)
   M.config = vim.tbl_deep_extend("force", M.config, args or {})
-  -- commands.setup()
+
+  functions.load_queries(debug.getinfo(1).source:match("@?(.*/)"))
 end
 
 M.pick_state = function ()
-  local matches = functions.get_query_matches("xstate.state.name")
-  functions.picker_from_matches(matches)
+  functions.ts_picker({ "state" })
+end
+
+M.pick_event = function ()
+  functions.ts_picker({ "event" })
 end
 
 return M
